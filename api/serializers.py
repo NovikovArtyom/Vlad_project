@@ -1,14 +1,13 @@
-from django.contrib.auth import get_user_model
+from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
-from api.models import BaseModel, Article
+from api.models import BaseModel, Article, CustomUser, Video, Comment
 
-User = get_user_model()
 
-class CustomUserSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(UserCreateSerializer):
     class Meta:
-        model = User
-        fields = ['id', 'email']
+        model = CustomUser
+        fields = ['id', 'email', 'password']
 
 
 class BaseModelSerializer(serializers.ModelSerializer):
@@ -21,3 +20,15 @@ class ArticleSerializer(BaseModelSerializer):
     class Meta:
         model = Article
         fields = BaseModelSerializer.Meta.fields + ['name', 'article']
+
+
+class VideoSerializer(BaseModelSerializer):
+    class Meta:
+        model = Video
+        fields = BaseModelSerializer.Meta.fields + ['name', 'url']
+
+
+class CommentSerializer(BaseModelSerializer):
+    class Meta:
+        model = Comment
+        fields = BaseModelSerializer.Meta.fields + ['comment']

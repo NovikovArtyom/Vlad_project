@@ -141,12 +141,12 @@ SIMPLE_JWT = {
 }
 
 DJOSER = {
-    'LOGIN_FIELD': 'email',
+    'LOGIN_FIELD': 'id',
     'USER_ID_FIELD': 'email',
+    'USER_CREATE_PASSWORD_RETYPE': False,
     'SERIALIZERS': {
-        'user': 'api.serializers.CustomUserSerializer',
-        'current_user': 'api.serializers.CustomUserSerializer',
-    }
+        'user_create': 'api.serializers.CustomUserSerializer',
+    },
 }
 
 AUTH_USER_MODEL = 'api.CustomUser'

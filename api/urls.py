@@ -1,12 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
-from api.views import ArticleViewSet
+from api.views import ArticleViewSet, VideoViewSet, CommentViewSet
 
 router = SimpleRouter()
 router.register('article', ArticleViewSet)
-# router.register('video', VideoViewSet)
-# router.register('comment', CommentViewSet)
+router.register('video', VideoViewSet)
+router.register('comment', CommentViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
