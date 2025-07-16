@@ -47,7 +47,7 @@ class BaseModel(models.Model):
 
 class Article(BaseModel):
     name = models.CharField(max_length=255)
-    article = models.CharField(max_length=255)
+    article = models.TextField()
 
     def __str__(self):
         return self.name
@@ -62,6 +62,18 @@ class Video(BaseModel):
 
 
 class Comment(BaseModel):
+    article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    video = models.ForeignKey(
+        Video,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
     comment = models.TextField()
 
     def __str__(self):

@@ -150,3 +150,13 @@ DJOSER = {
 }
 
 AUTH_USER_MODEL = 'api.CustomUser'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'artyom.nov.1997artem@yandex.ru'
+EMAIL_HOST_PASSWORD = 'boalxgxbofaipkgn'
+DEFAULT_FROM_EMAIL = 'artyom.nov.1997artem@yandex.ru'
