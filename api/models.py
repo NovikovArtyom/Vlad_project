@@ -3,7 +3,16 @@ import uuid
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import ManyToManyField
 
+
+class Role(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=25)
+    description = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.title
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -13,6 +22,10 @@ class CustomUserManager(BaseUserManager):
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save()
+
+        role = Role.objects.get(title='USER')
+        user.role.add(role)
+
         return user
 
     def create_superuser(self, email, password, **extra_fields):
@@ -24,6 +37,7 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
+    role = ManyToManyField(Role)
     password = models.CharField(max_length=128)
 
     username = None

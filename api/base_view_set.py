@@ -5,13 +5,16 @@ from django.db import connection
 from django.db.models import Field
 from django.db.models.query import RawQuerySet
 from rest_framework import response, viewsets, status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
+
+from api.models import Role
 
 
 class BaseViewSet(viewsets.ModelViewSet):
     search_fields = []
     table_name = None
+    admin_role = Role.objects.get(title='ADMIN')
 
     def list(self, request, *args, **kwargs):
         order = request.query_params.get('order', 'id')
@@ -93,7 +96,27 @@ class BaseViewSet(viewsets.ModelViewSet):
             if isinstance(f, Field) and not f.is_relation
         ]
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if (instance.user.id != request.user.id) and (self.admin_role not in request.user.role.all()):
+            raise PermissionDenied(
+                "У вас нет прав для редактирования этой сущности. Только автор или администратор может изменять сущность.",
+                code=status.HTTP_403_FORBIDDEN
+            )
+        serializer = self.get_serializer(instance, data=request.data, partial=False)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+        if (instance.user.id != request.user.id) and (self.admin_role not in request.user.role.all()):
+            raise PermissionDenied(
+                "У вас нет прав для удаления этой сущности. Только автор или администратор может изменять сущность.",
+                code=status.HTTP_403_FORBIDDEN
+            )
         self.perform_destroy(instance)
         return Response({"data": "ok"}, status=status.HTTP_200_OK)

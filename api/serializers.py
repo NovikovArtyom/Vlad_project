@@ -1,13 +1,32 @@
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
-from api.models import BaseModel, Article, CustomUser, Video, Comment
+from api.models import BaseModel, Article, CustomUser, Video, Comment, Role
+
+
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = 'id', 'title', 'description'
 
 
 class CustomUserSerializer(UserCreateSerializer):
+    role = RoleSerializer(many=True, read_only=True)
+
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'password']
+        fields = ['id', 'email', 'role', 'password']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def create(self, validated_data):
+        role_data = validated_data.pop('role', None)
+        user = super().create(validated_data)
+
+        if role_data:
+            user.role.set(role_data)
+        return user
 
 
 class BaseModelSerializer(serializers.ModelSerializer):
@@ -34,6 +53,8 @@ class ArticleSerializer(BaseModelSerializer):
         if len(value) > 255:
             raise serializers.ValidationError('Длинна наименования поста должна быть меньше 255')
 
+        return value
+
 
 class VideoSerializer(BaseModelSerializer):
     class Meta:
@@ -46,6 +67,8 @@ class VideoSerializer(BaseModelSerializer):
 
         if len(value) > 255:
             raise serializers.ValidationError('Длинна наименования видео должна быть меньше 255')
+
+        return value
 
 
 class CommentSerializer(BaseModelSerializer):

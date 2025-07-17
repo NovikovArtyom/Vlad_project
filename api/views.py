@@ -1,11 +1,13 @@
 from django.core.mail import send_mail
-from rest_framework import status
+from rest_framework import status, viewsets
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.base_view_set import BaseViewSet
-from api.models import Article, Video, Comment
-from api.serializers import ArticleSerializer, VideoSerializer, CommentSerializer, CommentListSerializer
+from api.models import Article, Video, Comment, CustomUser, Role
+from api.serializers import ArticleSerializer, VideoSerializer, CommentSerializer, CommentListSerializer, \
+    CustomUserSerializer
 
 
 class ArticleViewSet(BaseViewSet):
@@ -32,6 +34,20 @@ class CommentViewSet(BaseViewSet):
         if self.action == 'list':
             return CommentListSerializer
         return CommentSerializer
+
+
+class UsersViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+
+    def list(self, request, *args, **kwargs):
+        admin_role = Role.objects.get(title='ADMIN')
+        if admin_role not in request.user.role.all():
+            raise PermissionDenied(
+                "У вас нет прав для получения списка пользователей",
+                code=status.HTTP_403_FORBIDDEN
+            )
+        return super(UsersViewSet, self).list(request, *args, **kwargs)
 
 
 class SendEmailView(APIView):
